@@ -1,16 +1,26 @@
 package org.ashone.rconcore.domain;
 
-import org.ashone.rconcore.setting.Setting;
-import org.ashone.rconcore.setting.SettingPropertiesName;
-import org.ashone.rconcore.type.PacketType;
 import org.ashone.rconcore.type.PacketTypeEnum;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
-public class SendPacket extends AbstractPacket{
+public class SendPacket extends AbstractPacket {
+
+    public SendPacket() {
+    }
+
+    public SendPacket(int id, String payload, PacketTypeEnum packetTypeEnum) {
+
+        this.setId(id);
+        this.build(payload, packetTypeEnum);
+
+    }
+
+    public SendPacket(String payload, PacketTypeEnum packetTypeEnum) {
+
+        this.build(payload, packetTypeEnum);
+    }
 
     public ByteBuffer getByteBuffer() {
         return super.getByteBuffer();
@@ -31,7 +41,7 @@ public class SendPacket extends AbstractPacket{
 
         super.setId(id);
 
-        this.getByteBuffer().putInt(Packet.SIZE_BYTES,this.getId());
+        this.getByteBuffer().putInt(Packet.SIZE_BYTES, this.getId());
 
 
     }
@@ -40,6 +50,21 @@ public class SendPacket extends AbstractPacket{
         return super.getPayload();
     }
 
+    public void setPayload(String payload) {
+        if (this.getPayload() == null || payload.length() == this.getPayload().length()) {
+            super.setPayload(payload);
+            this.getByteBuffer().put(Packet.SIZE_BYTES + Packet.TYPE_BYTES + Packet.ID_BYTES, this.getPayload().getBytes(StandardCharsets.US_ASCII));
+            this.setRconLength(Packet.BASE_BYTES + payload.length());
+
+
+        } else {
+            super.setPayload(null);
+            this.build(payload, this.getTypeEnum());
+
+        }
+
+
+    }
 
     public int getRealLength() {
         return super.getRealLength();
@@ -57,9 +82,9 @@ public class SendPacket extends AbstractPacket{
     public void setRconLength(int rconLength) {
 
         super.setRconLength(rconLength);
-        this.getByteBuffer().putInt(0,this.getRconLength());
+        this.getByteBuffer().putInt(0, this.getRconLength());
 
-super.setRealLength(this.getRconLength()+Packet.SIZE_BYTES);
+        super.setRealLength(this.getRconLength() + Packet.SIZE_BYTES);
     }
 
     public int getType() {
@@ -75,19 +100,19 @@ super.setRealLength(this.getRconLength()+Packet.SIZE_BYTES);
 
     public PacketTypeEnum getTypeEnum() {
         return
-        super.getTypeEnum();
+                super.getTypeEnum();
     }
 
     public void setTypeEnum(PacketTypeEnum typeEnum) {
 
         super.setTypeEnum(typeEnum);
-        this.getByteBuffer().putInt(Packet.SIZE_BYTES+Packet.ID_BYTES,this.getTypeEnum().getTypeId());
+        this.getByteBuffer().putInt(Packet.SIZE_BYTES + Packet.ID_BYTES, this.getTypeEnum().getTypeId());
 
     }
 
     public byte[] getDataGram() {
         return
-        super.getDataGram();
+                super.getDataGram();
     }
 
     public void setDataGram(byte[] dataGram) {
@@ -95,57 +120,14 @@ super.setRealLength(this.getRconLength()+Packet.SIZE_BYTES);
         super.setDataGram(dataGram);
     }
 
-
-
-
-
-
-
-
-
-
-
-    public SendPacket() {
-    }
-
-    public SendPacket(int id,String payload, PacketTypeEnum packetTypeEnum){
-
-        this.setId(id);
-        this.build(payload, packetTypeEnum);
-
-    }
-
-    public SendPacket(String payload, PacketTypeEnum packetTypeEnum) {
-
-this.build(payload, packetTypeEnum);
-    }
-
-    public void setPayload(String payload) {
-        if (this.getPayload()==null||payload.length()==this.getPayload().length()){
-            super.setPayload(payload);
-            this.getByteBuffer().put(Packet.SIZE_BYTES+Packet.TYPE_BYTES+Packet.ID_BYTES,this.getPayload().getBytes(StandardCharsets.US_ASCII));
-            this.setRconLength(Packet.BASE_BYTES+payload.length());
-
-
-        }else {
-            super.setPayload(null);
-this.build(payload,this.getTypeEnum());
-
-        }
-
-
-
-
-    }
-
     public SendPacket build(String payload, PacketTypeEnum packetTypeEnum) {
-        ByteBuffer buffer=this.byteContainer(payload.length());
+        ByteBuffer buffer = this.byteContainer(payload.length());
 
         this.setByteBuffer(buffer);
 
-        if (super.getId()==null){
+        if (super.getId() == null) {
             this.setId(this.idGenerate());
-        }else {
+        } else {
             this.setId(this.getId());
         }
 
@@ -156,16 +138,6 @@ this.build(payload,this.getTypeEnum());
 
         return this;
     }
-
-
-
-
-
-
-
-
-
-
 
 
 //

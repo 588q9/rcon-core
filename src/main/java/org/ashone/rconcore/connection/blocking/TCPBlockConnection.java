@@ -20,28 +20,33 @@ import java.util.Arrays;
 public class TCPBlockConnection extends AbstractConnection {
 
 
-    private Socket socket;
-private OutputStream os;
-private InputStream is;
     byte receiveData[];
+    private Socket socket;
+    private OutputStream os;
+    private InputStream is;
 
-    public TCPBlockConnection(String ip,Integer port,String password) throws IOException {
-super(ip, port, password);
+    public TCPBlockConnection(String ip, Integer port, String password) throws IOException {
+        super(ip, port, password);
     }
 
-    protected void establish(SendPacket authPacket,String ip,Integer port) throws IOException {
+    public TCPBlockConnection(SendPacket authPacket) throws IOException {
+        establish(authPacket, Setting.getProp(SettingPropertiesName.propertiesKey(SettingPropertiesName.server.key(), SettingPropertiesName.ip.key())), Integer.parseInt(Setting.getProp(SettingPropertiesName.propertiesKey(SettingPropertiesName.server.key(), SettingPropertiesName.port.key()))));
 
-        socket=new Socket(ip,port);
+    }
+
+    protected void establish(SendPacket authPacket, String ip, Integer port) throws IOException {
+
+        socket = new Socket(ip, port);
 
 
-        os=socket.getOutputStream();
-        is=socket.getInputStream();
-        byte []data=authPacket.getDataGram();
+        os = socket.getOutputStream();
+        is = socket.getInputStream();
+        byte[] data = authPacket.getDataGram();
         os.write(data);
 
-        ReceivePacket receivePacket=null;
-        receivePacket=this.buildDataList();
-        SendAndReceive sendAndReceive=new SendAndReceive(authPacket,receivePacket);
+        ReceivePacket receivePacket = null;
+        receivePacket = this.buildDataList();
+        SendAndReceive sendAndReceive = new SendAndReceive(authPacket, receivePacket);
 
         if (!this.isAuthTheConnection(sendAndReceive)) {
             throw new AuthenticationException("cannot authentication please check password");
@@ -49,92 +54,68 @@ super(ip, port, password);
         }
     }
 
-    public TCPBlockConnection(SendPacket authPacket) throws IOException {
-establish(authPacket,Setting.getProp(SettingPropertiesName.propertiesKey(SettingPropertiesName.server.key(),SettingPropertiesName.ip.key())),Integer.parseInt(Setting.getProp(SettingPropertiesName.propertiesKey(SettingPropertiesName.server.key(),SettingPropertiesName.port.key()))));
-
-    }
-
-
-
-
-
     @Override
     public SendAndReceive SendPacketToServer(SendPacket sendPacket) {
 
 
-        ReceivePacket receivePacket=null;
+        ReceivePacket receivePacket = null;
         try {
             os.write(sendPacket.getDataGram());
 
 
-            receivePacket= this.buildDataList();
+            receivePacket = this.buildDataList();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
         assert receivePacket != null;
-        if (!idEqual(sendPacket,receivePacket)){
+        if (!idEqual(sendPacket, receivePacket)) {
 
-            throw new IdUnIdenticalException(sendPacket.getId(),receivePacket.getId());
+            throw new IdUnIdenticalException(sendPacket.getId(), receivePacket.getId());
         }
 
 
-        return new SendAndReceive(sendPacket,receivePacket);
-
+        return new SendAndReceive(sendPacket, receivePacket);
 
 
     }
-
-
 
 
     protected ReceivePacket buildDataList() throws IOException {
-        ReceivePacket receivePacket=new ReceivePacket();
+        ReceivePacket receivePacket = new ReceivePacket();
         int readLength;
-        byte tempData[]=new byte[MAX_PACK_SIZE];// 测试1024，实用时是4096
+        byte tempData[] = new byte[MAX_PACK_SIZE];// 测试1024，实用时是4096
 
-        readLength=is.read(tempData);
-        if (readLength==-1){
-            throw new ReadException("readLength:"+readLength);
+        readLength = is.read(tempData);
+        if (readLength == -1) {
+            throw new ReadException("readLength:" + readLength);
         }
-        receivePacket.getDataList().add(Arrays.copyOf(tempData,readLength));
+        receivePacket.getDataList().add(Arrays.copyOf(tempData, readLength));
 
 
-        receivePacket.constructSuffix(tempData,readLength);
+        receivePacket.constructSuffix(tempData, readLength);
 
 
         int readLengthTotal;
-        for(readLengthTotal=readLength- Packet.SIZE_BYTES; readLengthTotal<receivePacket.getRconLength(); readLengthTotal=readLengthTotal+readLength){
-            readLength=is.read(tempData);
-            receivePacket.getDataList().add(Arrays.copyOf(tempData,readLength));
+        for (readLengthTotal = readLength - Packet.SIZE_BYTES; readLengthTotal < receivePacket.getRconLength(); readLengthTotal = readLengthTotal + readLength) {
+            readLength = is.read(tempData);
+            receivePacket.getDataList().add(Arrays.copyOf(tempData, readLength));
         }
 
         receivePacket.buildPayload();
-return receivePacket;
+        return receivePacket;
     }
 
 
+    public void close() throws IOException {
 
 
-
-
-
-    public void close()  throws IOException{
-
-
-            if (socket!=null){
-                this.socket.close();
-            }
-
-
-
-
-
+        if (socket != null) {
+            this.socket.close();
+        }
 
 
     }
-
-
 
 
 }

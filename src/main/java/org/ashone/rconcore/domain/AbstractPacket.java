@@ -3,9 +3,17 @@ package org.ashone.rconcore.domain;
 import org.ashone.rconcore.type.PacketTypeEnum;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
-public abstract class AbstractPacket implements Packet{
+public abstract class AbstractPacket implements Packet {
+
+    private Integer id = null;
+    private String payload;
+    private int realLength;
+    private int rconLength;
+    private int type;
+    private PacketTypeEnum typeEnum;
+    private byte[] dataGram;
+    private ByteBuffer byteBuffer;
 
     public Integer getId() {
         return id;
@@ -70,14 +78,5 @@ public abstract class AbstractPacket implements Packet{
     public void setByteBuffer(ByteBuffer byteBuffer) {
         this.byteBuffer = byteBuffer;
     }
-
-    private Integer id=null;
-    private String payload;
-    private int realLength;
-    private int rconLength;
-    private int type;
-    private PacketTypeEnum typeEnum;
-    private byte[] dataGram;
-private     ByteBuffer byteBuffer;
 
 }

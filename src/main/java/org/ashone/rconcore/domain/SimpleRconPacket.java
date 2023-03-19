@@ -3,8 +3,9 @@ package org.ashone.rconcore.domain;
 import org.ashone.rconcore.type.PacketTypeEnum;
 
 import java.nio.ByteBuffer;
+
 //sendpacket和receivepacket构造重复的逻辑有很多，既然格式都相同那么可以用一个类表示
-public class SimpleRconPacket implements Packet{
+public class SimpleRconPacket implements Packet {
 
 
     private ByteBuffer byteBuffer;
@@ -55,7 +56,7 @@ public class SimpleRconPacket implements Packet{
 
 
     public ByteBuffer getByteBuffer() {
-       return null;
+        return null;
     }
 
     public void setByteBuffer(ByteBuffer byteBuffer) {
